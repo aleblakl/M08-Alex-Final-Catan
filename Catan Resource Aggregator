@@ -1,0 +1,230 @@
+import tkinter as tk
+import random
+from PIL import ImageTk, Image
+
+window = tk.Tk()
+window.title("Catan Resource Aggregator")
+
+
+my_img = ImageTk.PhotoImage(Image.open("hexes.jpg"))
+
+image_label = tk.Label(window, image=my_img, height=200, text="Catan Resource Aggregator")
+image_label.pack()
+
+clicks = 0
+hex_num_label = tk.Label(window, text="Catan Resource Aggregator", bg="white", font=("Arial", 20))
+hex_num_label.place(relx=.34, rely=.1)
+
+roll_results = []  # List to store the results of each roll
+roll_frequencies = {i: 0 for i in range(2, 13)}  # Dictionary to count the frequency of each number (2 to 12)
+
+# Define a dictionary to store resource values
+resource_values = {
+    "WOOL": 0,
+    "GRAIN": 0,
+    "LUMBER": 0,
+    "BRICK": 0,
+    "ORE": 0
+}
+
+# Define result_label as a global variable
+result_label = tk.Label(window, font=("Calibri", 18))
+result_label.pack()
+
+clicks_label = tk.Label(window, font=("Calibri", 14))
+clicks_label.pack()
+
+def roll_dice():
+    global result_label, total  # Declare result_label as global
+    die1 = random.randint(1, 6)
+    die2 = random.randint(1, 6)
+    total = die1 + die2
+
+    show_frequencies_button.config(state='normal')
+
+    # Append the result of the current roll to the list
+    roll_results.append(total)
+
+    # Update the frequency count for the current total
+    roll_frequencies[total] += 1
+
+    result_label.config(text=f"{die1} + {die2} = {total}")
+    
+    global clicks
+    clicks += 1
+    
+    clicks_label.config(text="Clicks: " + str(clicks))
+
+    # Check the resource values and update them accordingly
+    for resource, entry, var1, var2 in [
+        ("WOOL", hex1_wool, var_wool, var_wool2),
+        ("GRAIN", hex2_grain, var_grain, var_grain2),
+        ("LUMBER", hex3_lumber, var_lumber, var_lumber2),
+        ("BRICK", hex4_brick, var_brick, var_brick2),
+        ("ORE", hex5_ore, var_ore, var_ore2)
+    ]:
+        resource_entry = entry.get()
+        if var1.get() and var2.get() and resource_entry == str(total):
+            resource_values[resource] += 2
+        elif (var1.get() or var2.get()) and resource_entry == str(total):
+            resource_values[resource] += 1
+
+
+    # Update the labels displaying resource values
+    update_resource_labels()
+
+def update_resource_labels():
+    for resource, label in resource_labels.items():
+        label.config(text=f"{resource}: {resource_values[resource]}")
+
+# Create the main frame for labels and Checkboxes
+frame_a = tk.Frame(window, relief=tk.RAISED, borderwidth=1)
+frame_a.pack()
+
+# Labels for resources
+wool = tk.Label(frame_a, text="WOOL", fg="deep pink", bg="alice blue")
+grain = tk.Label(frame_a, text="GRAIN", fg="goldenrod", bg="wheat")
+lumber = tk.Label(frame_a, text="LUMBER", fg="brown", bg="chocolate")
+brick = tk.Label(frame_a, text="BRICK", fg="dark red", bg="dark gray")
+ore = tk.Label(frame_a, text="ORE", fg="olive drab", bg="black")
+
+# Use the grid method to position labels
+wool.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+grain.grid(row=1, column=0, padx=10, pady=5, sticky="w")
+lumber.grid(row=2, column=0, padx=10, pady=5, sticky="w")
+brick.grid(row=3, column=0, padx=10, pady=5, sticky="w")
+ore.grid(row=4, column=0, padx=10, pady=5, sticky="w")
+
+# Checkbuttons for settlements
+var_wool = tk.BooleanVar()
+var_grain = tk.BooleanVar()
+var_lumber = tk.BooleanVar()
+var_brick = tk.BooleanVar()
+var_ore = tk.BooleanVar()
+
+var_wool2 = tk.BooleanVar()
+var_grain2 = tk.BooleanVar()
+var_lumber2 = tk.BooleanVar()
+var_brick2 = tk.BooleanVar()
+var_ore2 = tk.BooleanVar()
+
+c1_wool = tk.Checkbutton(frame_a, text="Settlement?", onvalue=1, offvalue=0, variable=var_wool)
+c2_wool = tk.Checkbutton(frame_a, onvalue=1, offvalue=0, variable=var_wool2)
+c1_grain = tk.Checkbutton(frame_a, text="Settlement?", onvalue=1, offvalue=0, variable=var_grain)
+c2_grain = tk.Checkbutton(frame_a, onvalue=1, offvalue=0, variable=var_grain2)
+c1_lumber = tk.Checkbutton(frame_a, text="Settlement?", onvalue=1, offvalue=0, variable=var_lumber)
+c2_lumber = tk.Checkbutton(frame_a, onvalue=1, offvalue=0, variable=var_lumber2)
+c1_brick = tk.Checkbutton(frame_a, text="Settlement?", onvalue=1, offvalue=0, variable=var_brick)
+c2_brick = tk.Checkbutton(frame_a, onvalue=1, offvalue=0, variable=var_brick2)
+c1_ore = tk.Checkbutton(frame_a, text="Settlement?", onvalue=1, offvalue=0, variable=var_ore)
+c2_ore = tk.Checkbutton(frame_a, onvalue=1, offvalue=0, variable=var_ore2)
+
+# Use the grid method to position Checkboxes
+c1_wool.grid(row=0, column=1, pady=5, sticky="e")
+c2_wool.grid(row=0, column=2, pady=5, sticky="e")
+c1_grain.grid(row=1, column=1, pady=5, sticky="e")
+c2_grain.grid(row=1, column=2, pady=5, sticky="e")
+c1_lumber.grid(row=2, column=1, pady=5, sticky="e")
+c2_lumber.grid(row=2, column=2, pady=5, sticky="e")
+c1_brick.grid(row=3, column=1, pady=5, sticky="e")
+c2_brick.grid(row=3, column=2, pady=5, sticky="e")
+c1_ore.grid(row=4, column=1, pady=5, sticky="e")
+c2_ore.grid(row=4, column=2, pady=5, sticky="e")
+
+hex1_wool = tk.Entry(frame_a, width=5, borderwidth=2, bg="alice blue", fg="deep pink")
+hex2_grain = tk.Entry(frame_a, width=5, borderwidth=2, bg="wheat", fg="goldenrod")
+hex3_lumber = tk.Entry(frame_a, width=5, borderwidth=2, bg="chocolate", fg="brown")
+hex4_brick = tk.Entry(frame_a, width=5, borderwidth=2, bg="dark gray", fg="dark red")
+hex5_ore = tk.Entry(frame_a, width=5, borderwidth=2, bg="black", fg="olive drab")
+
+hex1_wool.insert(0, "Hex #")
+hex2_grain.insert(0, "Hex #")
+hex3_lumber.insert(0, "Hex #")
+hex4_brick.insert(0, "Hex #")
+hex5_ore.insert(0, "Hex #")
+
+
+hex1_wool.grid(row=0, column=3, padx=5, pady=5)
+hex2_grain.grid(row=1, column=3, padx=5, pady=5)
+hex3_lumber.grid(row=2, column=3, padx=5, pady=5)
+hex4_brick.grid(row=3, column=3, padx=5, pady=5)
+hex5_ore.grid(row=4, column=3, padx=5, pady=5)
+
+window.title("Dice Roller")
+
+def reset_game():
+    
+    global WOOL, GRAIN, LUMBER, BRICK, ORE, resource_values, clicks
+
+    show_frequencies_button.config(state='disabled')
+
+    # Reset individual resource values
+    WOOL = 0
+    GRAIN = 0
+    LUMBER = 0
+    BRICK = 0
+    ORE = 0
+    
+    
+    # Reset resource_values dictionary
+    resource_values = {
+        "WOOL": 0,
+        "GRAIN": 0,
+        "LUMBER": 0,
+        "BRICK": 0,
+        "ORE": 0
+    }
+
+    # Update the labels to display the reset values
+    for resource in resource_labels:
+        resource_labels[resource].config(text=f"{resource}: {resource_values[resource]}")
+
+    clicks = 0
+    clicks_label.config(text="Clicks: 0")
+
+    global roll_frequencies
+    roll_frequencies = {i: 0 for i in range(2, 13)}
+
+
+
+def show_frequencies():
+    result_window = tk.Toplevel(window)
+    result_window.title("Roll Frequencies")
+
+    if clicks < 1:
+        show_frequencies_button.config(state='disabled')
+
+    for total, frequency in roll_frequencies.items():
+        label = tk.Label(result_window, text=f"{total}: {round(((frequency/clicks)*100))}%")
+        label.pack()
+
+    
+
+roll_button = tk.Button(window, text="Roll Dice", command=roll_dice)
+roll_button.pack(pady=10)
+
+reset_button = tk.Button(window, text="Reset", command=reset_game)
+reset_button.pack(pady=10)
+
+
+show_frequencies_button = tk.Button(window, text="Show Frequencies", command=show_frequencies, state="disable")
+show_frequencies_button.pack(pady=10)
+
+# Create labels for resource values
+resource_labels = {}
+for row, resource in enumerate(resource_values.keys()):
+    resource_labels[resource] = tk.Label(frame_a, text=f"{resource}: {resource_values[resource]}")
+    resource_labels[resource].grid(row=row, column=4, padx=10, pady=5, sticky="w")
+
+instructions = tk.Label(window, text="The sum of the dice determines which hexes produce resources.\nEnter your desired hex numbers.\nCheck 1 or 2 settlements.", font=("Arial", 14))
+instructions.pack(padx=10)
+
+board_img = Image.open("Catan_board.jpg")
+shrunken_img = board_img.resize((board_img.width // 2, board_img.height // 2))
+board_pic = ImageTk.PhotoImage(shrunken_img)
+
+image2_label = tk.Label(window, image=board_pic, text="Catan Board")
+image2_label.pack()
+
+
+window.mainloop()
